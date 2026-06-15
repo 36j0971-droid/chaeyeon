@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김채연의 아늑한 방 | 확장판</title>
+    <style>
+        /* 기본 스타일 리셋 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0914;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            color: #f5f5f7;
+        }
+
+        /* 메인 컨테이너: 챕터 간 슬라이드 전환용 */
+        .stage-container {
+            display: flex;
+            width: 200%;
+            height: 100%;
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        /* 챕터 공통 스타일 */
+        .chapter {
+            position: relative;
+            width: 50%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 원근감을 위한 바닥 레이어 */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35%;
+            box-shadow: inset 0 20px 30px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        .interactive-obj {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .interactive-obj:hover {
+            transform: scale(1.02);
+            filter: drop-shadow(0 0 12px rgba(255, 184, 108, 0.4));
+        }
+
+        /* ==========================================================================
+           CHAPTER 1: 비 오는 아늑한 방
+           ========================================================================== */
+        #chapter1 {
+            background: linear-gradient(135deg, #1a162b 0%, #0d0b18 50%, #05040a 100%);
+        }
+        #chapter1::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 70% 30%, transparent 20%, rgba(0, 0, 0, 0.6) 80%);
+            z-index: 2; pointer-events: none;
+        }
+        #chapter1 .floor {
+            background: linear-gradient(to bottom, #110d1c, #09070f);
+        }
+
+        /* 창문 */
+        .window-wrapper {
+            top: 10%; left: 6%; width: 24%; height: 48%;
+            background: #181c2b; border: 12px solid #0d0a12; border-radius: 4px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.9);
+            overflow: hidden; z-index: 3;
+        }
+        .window-view { position: relative; width: 100%; height: 100%; background: linear-gradient(to bottom, #101424, #1f273d); }
+        .window-view::before {
+            content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 200%;
+            background: repeat url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="40" viewBox="0 0 20 40"><line x1="10" y1="0" x2="5" y2="40" stroke="rgba(255,255,255,0.15)" stroke-width="1"/></svg>');
+            animation: rain 0.8s linear infinite;
+        }
+
+        /* 벽난로 */
+        .fireplace {
+            bottom: 25%; right: 6%; width: 22%; height: 42%;
+            background: linear-gradient(135deg, #2c1e18, #18100c); border-top: 15px solid #110b08; border-radius: 8px 8px 0 0;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9); z-index: 3; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 5px;
+        }
+        .fireplace-core { width: 65%; height: 55%; background: #0a0604; border-radius: 40px 40px 0 0; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: flex-end; }
+        .fire { width: 50%; height: 70%; background: radial-gradient(circle at bottom, #ff9d00 20%, #ff3c00 60%, transparent 80%); filter: blur(4px); animation: flicker 0.15s infinite alternate, pulse 1.5s infinite ease-in-out; transform-origin: bottom center; }
+        .fireplace-glow { position: absolute; bottom: -20%; right: -20%; width: 140%; height: 140%; background: radial-gradient(circle, rgba(255, 94, 0, 0.08) 0%, transparent 70%); pointer-events: none; z-index: 2; animation: flicker 0.15s infinite alternate; }
+
+        /* 테이블과 코코아 */
+        .table-group { bottom: 6%; left: 8%; width: 20%; height: 20%; z-index: 4; }
+        .table { position: absolute; bottom: 0; width: 100%; height: 40%; background: linear-gradient(to bottom, #2a1d15, #19110c); border-radius: 8px; box-shadow: 0 15px 30px rgba(0,0,0,0.7); }
+        .cocoa-cup { position: absolute; top: -25px; left: 40%; width: 30px; height: 30px; background: linear-gradient(135deg, #7a5843, #4a3325); border-radius: 4px 4px 12px 12px; transition: transform 0.3s; }
+        .steam { position: absolute; top: -12px; left: 50%; width: 5px; height: 12px; background: rgba(255,255,255,0.2); border-radius: 50%; filter: blur(2px); animation: steamUp 2s infinite linear; }
+
+        /* 문 (다음 챕터로 이동하는 매개체) */
+        .door-wrapper {
+            position: absolute;
+            bottom: 25%;
+            left: 36%;
+            width: 12%;
+            height: 48%;
+            background: #0a0812;
+            border: 8px solid #1a1526;
+            border-bottom: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 3;
+            perspective: 1000px;
+        }
+        .door-panel {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #322846, #1f182e);
+            border: 2px solid #3d3154;
+            position: relative;
+            transform-origin: left center;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+        }
+        .door-knob {
+            width: 12px; height: 12px;
+            background: radial-gradient(circle, #ffb86c, #bf7c30);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        /* 문이 열릴 때의 클래스 */
+        .door-wrapper.open .door-panel {
+            transform: rotateY(-110deg);
+        }
+        /* 문 틈으로 새어나오는 다음 방의 빛 */
+        .door-light {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, rgba(255, 121, 198, 0.15), transparent);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* ==========================================================================
+           CHAPTER 2: 고양이의 비밀 놀이방
+           ========================================================================== */
+        #chapter2 {
+            background: linear-gradient(135deg, #1c1326 0%, #110b18 60%, #08040d 100%);
+        }
+        #chapter2::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 40%, transparent 30%, rgba(0, 0, 0, 0.5) 90%);
+            z-index: 2; pointer-events: none;
+        }
+        #chapter2 .floor {
+            background: linear-gradient(to bottom, #160e20, #0c0714);
+        }
+
+        /* 돌아가기 문 */
+        .back-door {
+            position: absolute;
+            bottom: 25%; right: 5%; width: 10%; height: 48%;
+            background: #110b18; border: 6px solid #251833; border-bottom: none;
+            z-index: 3; display: flex; align-items: center; justify-content: center;
+        }
+        .back-link {
+            font-size: 0.8rem; color: #a49cb3; text-decoration: none; letter-spacing: 0.05em;
+        }
+
+        /* 공을 가지고 노는 고양이 그룹 */
+        .playing-cat-zone {
+            position: absolute;
+            bottom: 8%;
+            left: 20%;
+            width: 350px;
+            height: 200px;
+            z-index: 4;
+        }
+        .active-cat {
+            position: absolute;
+            bottom: 20px; left: 50px;
+            width: 55px; height: 45px;
+            background: #2b2b36;
+            border-radius: 25px 25px 15px 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            animation: catPlayMoving 4s infinite ease-in-out;
+            transform-origin: bottom center;
+        }
+        .active-cat::before, .active-cat::after {
+            content: ''; position: absolute; top: -6px;
+            width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 12px solid #2b2b36;
+        }
+        .active-cat::before { left: 4px; transform: rotate(-15deg); }
+        .active-cat::after { right: 4px; transform: rotate(15deg); }
+        
+        .active-cat-tail {
+            position: absolute; bottom: 5px; left: -10px;
+            width: 20px; height: 8px; background: #2b2b36; border-radius: 8px 0 0 8px;
+            transform-origin: right center; animation: tailWag 1s infinite alternate;
+        }
+
+        /* 고양이가 가지고 노는 털실 공 */
+        .yarn-ball {
+            position: absolute;
+            bottom: 25px;
+            left: 200px;
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle at 30% 30%, #ff79c6, #bd287b);
+            border-radius: 50%;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+            animation: ballRoll 4s infinite ease-in-out;
+        }
+
+        /* 캣타워 장식 (공간 깊이감 조성) */
+        .cattower {
+            position: absolute;
+            bottom: 15%;
+            left: 5%;
+            width: 12%;
+            height: 60%;
+            background: linear-gradient(to bottom, #2c2035, #181120);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            z-index: 3;
+        }
+
+        /* ==========================================================================
+           중앙 자기소개 카드 UI (고정 배치)
+           ========================================================================== */
+        .intro-card {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            background: rgba(22, 19, 36, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            z-index: 10;
+            pointer-events: auto;
+        }
+        .guide-text { text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-bottom: 25px; text-transform: uppercase; }
+        .profile-header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 18px; margin-bottom: 22px; }
+        .profile-name { font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+        .profile-name span { font-size: 0.85rem; color: #a49cb3; font-weight: 400; }
+        .info-section { margin-bottom: 20px; }
+        .info-title { font-size: 0.8rem; color: #ff79c6; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
+        .info-content { font-size: 0.95rem; color: #d2cbdc; line-height: 1.6; }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .tag { background: rgba(255, 255, 255, 0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; color: #e2def0; border: 1px solid rgba(255,255,255,0.03); }
+
+        /* 상단 실시간 안내 패널 */
+        .detail-overlay {
+            position: absolute;
+            top: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 30px;
+            font-size: 0.85rem; color: #ffb86c; z-index: 100; opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none;
+            border: 1px solid rgba(255, 184, 108, 0.2);
+        }
+        .detail-overlay.active { opacity: 1; transform: translateX(-50%) translateY(10px); }
+
+        /* ==========================================================================
+           애니메이션 키프레임 (Keyframes)
+           ========================================================================== */
+        @keyframes rain { 0% { background-position: 0% 0%; } 100% { background-position: -10% 100%; } }
+        @keyframes flicker { 0% { opacity: 0.93; } 100% { opacity: 1; transform: scale(1.02); } }
+        @keyframes pulse { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.08) scaleX(0.95); } }
+        @keyframes steamUp { 0% { transform: translate(-50%, 0) scaleX(1); opacity: 0; } 30% { opacity: 0.4; } 80% { transform: translate(-30%, -20px) scaleX(1.3); opacity: 0; } 100% { opacity: 0; } }
+        @keyframes tailWag { 0% { transform: rotate(-10deg); } 100% { transform: rotate(15deg); } }
+        
+        /* 고양이 뛰어노는 애니메이션 수치 연산 */
+        @keyframes catPlayMoving {
+            0%, 100% { transform: translateX(0) scaleX(1); }
+            45% { transform: translateX(110px) scaleX(1) translateY(-15px); }
+            50% { transform: translateX(110px) scaleX(-1); }
+            95% { transform: translateX(0) scaleX(-1) translateY(-15px); }
+        }
+        /* 실 뭉치 공이 튕기는 애니메이션 */
+        @keyframes ballRoll {
+            0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+            50% { transform: translateX(-100px) translateY(-30px) rotate(-360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="detail-overlay" id="detailOverlay">안내 메시지</div>
+
+    <div class="stage-container" id="stageContainer">
+        
+        <div class="chapter" id="chapter1">
+            <div class="floor"></div>
+            <div class="door-light"></div>
+
+            <div class="door-wrapper interactive-obj" id="doorObj" data-info="문을 열면 고양이가 활기차게 노는 또 다른 비밀 공간이 나타납니다. 클릭하여 이동해보세요.">
+                <div class="door-panel">
+                    <div class="door-knob"></div>
+                </div>
+            </div>
+
+            <div class="window-wrapper interactive-obj" data-info="창밖에는 새벽 비가 내리고 있습니다. 차분한 빗소리를 들으며 사색하는 공간입니다.">
+                <div class="window-view"></div>
+            </div>
+
+            <div class="fireplace interactive-obj" data-info="은은한 불꽃은 마음에 안정감을 줍니다. 비효율적인 복잡함을 덜어낸 현실적인 중심지입니다.">
+                <div class="fireplace-core">
+                    <div class="fire"></div>
+                </div>
+            </div>
+
+            <div class="table-group interactive-obj" data-info="따뜻한 코코아 한 잔. 사소한 귀찮음을 녹이고 온전한 휴식을 취하는 테이블입니다.">
+                <div class="cocoa-cup"><div class="steam"></div></div>
+                <div class="table"></div>
+            </div>
+        </div>
+
+        <div class="chapter" id="chapter2">
+            <div class="floor"></div>
+            <div class="cattower"></div>
+
+            <div class="playing-cat-zone interactive-obj" data-info="포근한 안방 뒤편, 고양이가 털실 공을 이리저리 굴리며 자유롭게 뛰어놀고 있습니다.">
+                <div class="active-cat">
+                    <div class="active-cat-tail"></div>
+                </div>
+                <div class="yarn-ball"></div>
+            </div>
+
+            <div class="back-door interactive-obj" id="backDoorObj" data-info="다시 문을 통해 아늑한 메인 서재방으로 돌아갑니다.">
+                <a href="#" class="back-link">돌아가기</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="intro-card">
+        <div class="guide-text" id="guideText">오브젝트와 문을 클릭해보세요</div>
+        
+        <div class="profile-header">
+            <div class="profile-name">김채연 <span>Chae Yeon</span></div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Personality</div>
+            <div class="info-content">
+                불필요한 동선을 거부하는 <strong>효율적</strong>이고 <strong>현실적</strong>인 가치관을 지녔습니다. 시스템의 군더더기를 줄이려는 성향이 강합니다.
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Interests</div>
+            <div class="info-content">
+                내면을 쌓아 올리는 <strong>공부</strong>와 <strong>글쓰기</strong>, 구조적인 아름다움을 만드는 <strong>방 꾸미기</strong>를 좋아합니다.
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">Favorites</div>
+            <div class="tag-container">
+                <span class="tag">🐈 고양이</span>
+                <span class="tag">☕ 코코아</span>
+                <span class="tag">🐇 토끼</span>
+                <span class="tag">🍒 체리</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const stageContainer = document.getElementById('stageContainer');
+        const doorObj = document.getElementById('doorObj');
+        const backDoorObj = document.getElementById('backDoorObj');
+        const overlay = document.getElementById('detailOverlay');
+        const interactiveElements = document.querySelectorAll('.interactive-obj');
+        let overlayTimeout;
+
+        // 텍스트 안내 오버레이 유틸 함수
+        function showOverlay(message) {
+            overlay.textContent = message;
+            overlay.classList.add('active');
+            clearTimeout(overlayTimeout);
+            overlayTimeout = setTimeout(() => {
+                overlay.classList.remove('active');
+            }, 3500);
+        }
+
+        // 공통 상호작용 설정
+        interactiveElements.forEach(element => {
+            element.addEventListener('click', (e) => {
+                // 문 클릭 이벤트 시 중복 처리 방지 목적
+                if(element.id === 'doorObj' || element.id === 'backDoorObj') return;
+
+                const message = element.getAttribute('data-info');
+                showOverlay(message);
+                
+                element.style.transform = 'scale(0.97)';
+                setTimeout(() => { element.style.transform = ''; }, 150);
+            });
+        });
+
+        // Chapter 1 -> Chapter 2 이동 연출 (문 열기)
+        doorObj.addEventListener('click', () => {
+            const msg = doorObj.getAttribute('data-info');
+            showOverlay(msg);
+            
+            doorObj.classList.add('open'); // 문 열리는 CSS 가동
+            
+            setTimeout(() => {
+                stageContainer.style.transform = 'translateX(-50%)'; // 2번 방 스크롤 카메라 무빙
+            }, 600);
+        });
+
+        // Chapter 2 -> Chapter 1 복귀 연출
+        backDoorObj.addEventListener('click', (e) => {
+            e.preventDefault();
+            const msg = backDoorObj.getAttribute('data-info');
+            showOverlay(msg);
+
+            stageContainer.style.transform = 'translateX(0%)'; // 1번 방으로 복귀
+            
+            setTimeout(() => {
+                doorObj.classList.remove('open'); // 열려있던 문을 다시 닫음
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
