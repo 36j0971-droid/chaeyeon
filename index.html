@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김채연의 아늑한 방 | Portfolio</title>
+    <style>
+        /* 기본 스타일 리셋 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0914;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            color: #f5f5f7;
+        }
+
+        /* 메인 룸 (전체 배경 및 원근감 구현) */
+        .room {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a162b 0%, #0d0b18 50%, #05040a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 내부 벽면 명암 및 깊이감 조절 */
+        .room::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 70% 30%, transparent 20%, rgba(0, 0, 0, 0.6) 80%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* 바닥 레이어 (원근감 표현) */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35%;
+            background: linear-gradient(to bottom, #110d1c, #09070f);
+            box-shadow: inset 0 20px 30px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        /* 상호작용 오브젝트 공통 스타일 */
+        .interactive-obj {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        /* 1. 창문 (비 오는 풍경) */
+        .window-wrapper {
+            top: 10%;
+            left: 8%;
+            width: 26%;
+            height: 50%;
+            background: #181c2b;
+            border: 12px solid #0d0a12;
+            border-radius: 4px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.9);
+            overflow: hidden;
+            z-index: 3;
+        }
+        .window-view {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #101424, #1f273d);
+        }
+        /* 비 애니메이션 */
+        .window-view::before {
+            content: '';
+            position: absolute;
+            top: -100%; left: 0; width: 100%; height: 200%;
+            background: repeat url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="40" viewBox="0 0 20 40"><line x1="10" y1="0" x2="5" y2="40" stroke="rgba(255,255,255,0.15)" stroke-width="1"/></svg>');
+            animation: rain 0.8s linear infinite;
+        }
+        /* 창문 조명 분위기 */
+        .window-wrapper::after {
+            content: '';
+            position: absolute;
+            top:0; left:0; width:100%; height:100%;
+            background: linear-gradient(180deg, rgba(39, 49, 78, 0.2) 0%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+        }
+
+        /* 2. 벽난로 */
+        .fireplace {
+            bottom: 25%;
+            right: 8%;
+            width: 24%;
+            height: 45%;
+            background: linear-gradient(135deg, #2c1e18, #18100c);
+            border-top: 15px solid #110b08;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.6);
+            z-index: 3;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 5px;
+        }
+        .fireplace-core {
+            width: 65%;
+            height: 55%;
+            background: #0a0604;
+            border-radius: 40px 40px 0 0;
+            position: relative;
+            box-shadow: inset 0 5px 20px rgba(0,0,0,1);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        /* 불꽃 및 Flicker 효과 */
+        .fire {
+            width: 50%;
+            height: 70%;
+            background: radial-gradient(circle at bottom, #ff9d00 20%, #ff3c00 60%, transparent 80%);
+            border-radius: 50% 50% 20% 20%;
+            filter: blur(4px);
+            animation: flicker 0.15s infinite alternate, pulse 1.5s infinite ease-in-out;
+            transform-origin: bottom center;
+        }
+        /* 벽난로가 방에 비추는 은은한 불빛 */
+        .fireplace-glow {
+            position: absolute;
+            bottom: -20%; right: -20%;
+            width: 140%; height: 140%;
+            background: radial-gradient(circle, rgba(255, 94, 0, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 2;
+            animation: flicker 0.15s infinite alternate;
+        }
+
+        /* 3. 테이블과 코코아 */
+        .table-group {
+            bottom: 8%;
+            left: 12%;
+            width: 22%;
+            height: 22%;
+            z-index: 4;
+        }
+        .table {
+            position: absolute;
+            bottom: 0; width: 100%; height: 40%;
+            background: linear-gradient(to bottom, #2a1d15, #19110c);
+            border-radius: 8px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.7);
+        }
+        .cocoa-cup {
+            position: absolute;
+            top: -30px; left: 40%;
+            width: 35px; height: 35px;
+            background: linear-gradient(135deg, #7a5843, #4a3325);
+            border-radius: 4px 4px 12px 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+        }
+        /* 코코아 김 피어오르는 효과 */
+        .steam {
+            position: absolute;
+            top: -15px; left: 50%;
+            width: 6px; height: 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            filter: blur(2px);
+            animation: steamUp 2s infinite linear;
+        }
+
+        /* 4. 고양이 (러그 위에 앉아있는 모습) */
+        .rug-cat-group {
+            bottom: 5%;
+            right: 15%;
+            width: 20%;
+            height: 18%;
+            z-index: 4;
+        }
+        .rug {
+            position: absolute;
+            bottom: 0; width: 100%; height: 50%;
+            background: radial-gradient(ellipse at center, #2e263d 0%, #1c1626 70%, transparent 100%);
+            border-radius: 50%;
+        }
+        .cat {
+            position: absolute;
+            bottom: 10px; left: 35%;
+            width: 50px; height: 45px;
+            background: #2b2b36;
+            border-radius: 25px 25px 15px 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+            animation: catBreathe 3s infinite ease-in-out;
+            transform-origin: bottom center;
+        }
+        /* 고양이 귀 */
+        .cat::before, .cat::after {
+            content: ''; position: absolute; top: -6px;
+            width: 0; height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid #2b2b36;
+        }
+        .cat::before { left: 4px; transform: rotate(-15deg); }
+        .cat::after { right: 4px; transform: rotate(15deg); }
+        /* 꼬리 미세한 움직임 */
+        .cat-tail {
+            position: absolute;
+            bottom: 0; right: -10px;
+            width: 25px; height: 8px;
+            background: #2b2b36;
+            border-radius: 0 8px 8px 0;
+            transform-origin: left center;
+            animation: tailWag 2.5s infinite ease-in-out;
+        }
+
+        /* 인터랙션 Hover 효과 (빛, 강조) */
+        .interactive-obj:hover {
+            transform: scale(1.02);
+            filter: drop-shadow(0 0 12px rgba(255, 184, 108, 0.4));
+        }
+        .table-group:hover .cocoa-cup {
+            transform: translateY(-4px) rotate(5deg);
+        }
+
+        /* 5. 중앙 카드 UI (자기소개 정보) */
+        .intro-card {
+            position: relative;
+            width: 380px;
+            background: rgba(22, 19, 36, 0.75);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), 
+                        inset 0 1px 0 rgba(255,255,255,0.1);
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardFadeIn 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.5s;
+        }
+
+        /* 가이드 툴팁 텍스트 */
+        .guide-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.1em;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+
+        /* 카드 내부 콘텐츠 스타일링 */
+        .profile-header {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+        }
+        .profile-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .profile-name span {
+            font-size: 0.85rem;
+            color: #a49cb3;
+            font-weight: 400;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+        .info-title {
+            font-size: 0.8rem;
+            color: #ff79c6;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+        .info-content {
+            font-size: 0.95rem;
+            color: #d2cbdc;
+            line-height: 1.6;
+        }
+
+        /* 태그 스타일 스타일 */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #e2def0;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        /* 실시간 인터랙션 정보 변경창 패널 */
+        .detail-overlay {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            letter-spacing: -0.01em;
+            color: #ffb86c;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            border: 1px solid rgba(255, 184, 108, 0.2);
+        }
+        .detail-overlay.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        /* --- 애니메이션 정의 키프레임 --- */
+        @keyframes rain {
+            0% { background-position: 0% 0%; }
+            100% { background-position: -10% 100%; }
+        }
+        @keyframes flicker {
+            0% { opacity: 0.93; }
+            100% { opacity: 1; transform: scale(1.02); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.08) scaleX(0.95); }
+        }
+        @keyframes steamUp {
+            0% { transform: translate(-50%, 0) scaleX(1); opacity: 0; }
+            30% { opacity: 0.4; }
+            80% { transform: translate(-30%, -20px) scaleX(1.3); opacity: 0; }
+            100% { opacity: 0; }
+        }
+        @keyframes catBreathe {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.04); }
+        }
+        @keyframes tailWag {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+        @keyframes cardFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="detail-overlay" id="detailOverlay">방 안의 무언가가 반응합니다.</div>
+
+    <div class="room">
+        <div class="floor"></div>
+
+        <div class="fireplace-glow"></div>
+
+        <div class="window-wrapper interactive-obj" data-info="창밖에는 새벽 비가 내리고 있습니다. 차분한 빗소리를 들으며 사색하는 것을 좋아합니다.">
+            <div class="window-view"></div>
+        </div>
+
+        <div class="fireplace interactive-obj" data-info="벽난로의 따뜻한 불꽃은 내면의 안정감을 줍니다. 복잡한 것보다 중심이 잡힌 현실적인 안정감을 추구합니다.">
+            <div class="fireplace-core">
+                <div class="fire"></div>
+            </div>
+        </div>
+
+        <div class="table-group interactive-obj" data-info="따뜻한 코코아 한 잔의 휴식. 좋아하는 것들을 곁들인 나만의 작은 취향 공간입니다.">
+            <div class="cocoa-cup">
+                <div class="steam"></div>
+            </div>
+            <div class="table"></div>
+        </div>
+
+        <div class="rug-cat-group interactive-obj" data-info="곁을 지켜주는 고요한 동반자 고양이. 조용히 교감하며 감정을 충전하곤 합니다.">
+            <div class="rug"></div>
+            <div class="cat">
+                <div class="cat-tail"></div>
+            </div>
+        </div>
+
+        <div class="intro-card">
+            <div class="guide-text">오브젝트를 탐색해보세요</div>
+            
+            <div class="profile-header">
+                <div class="profile-name">김채연 <span>Chae Yeon</span></div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">Personality</div>
+                <div class="info-content">
+                    불필요한 과정을 걷어내는 <strong>효율적</strong>이고 <strong>현실적</strong>인 성향을 지녔습니다. 늘 귀찮음을 최소화하기 위한 가장 스마트한 루트를 찾아냅니다.
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">Interests</div>
+                <div class="info-content">
+                    새로운 지식을 채우는 <strong>공부</strong>, 생각을 정돈하는 <strong>글쓰기</strong>, 그리고 나만의 몰입형 공간을 만드는 <strong>방 꾸미기</strong>에 몰두합니다.
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-title">Favorites</div>
+                <div class="tag-container">
+                    <span class="tag">🐈 고양이</span>
+                    <span class="tag">☕ 코코아</span>
+                    <span class="tag">🐇 토끼</span>
+                    <span class="tag">🍒 체리</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 인터랙션 구현 코드
+        const interactiveElements = document.querySelectorAll('.interactive-obj');
+        const overlay = document.getElementById('detailOverlay');
+        let overlayTimeout;
+
+        interactiveElements.forEach(element => {
+            element.addEventListener('click', () => {
+                const message = element.getAttribute('data-info');
+                
+                // 안내 메시지 팝업 노출 및 갱신
+                overlay.textContent = message;
+                overlay.classList.add('active');
+
+                clearTimeout(overlayTimeout);
+                overlayTimeout = setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 4000); // 4초 후 자연스럽게 사라짐
+
+                // 클릭 시 미세한 펄스 충격 인터랙션 피드백
+                element.style.transform = 'scale(0.97)';
+                setTimeout(() => {
+                    element.style.transform = '';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>
